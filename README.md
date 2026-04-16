@@ -6,12 +6,36 @@ This repository collects **products** and **experiments** built while working in
 
 | Location | What it is |
 |----------|------------|
-| [`advanced assistants/`](advanced%20assistants/) | **FlightAI Virtual Agent** — a richer assistant demo: multi-provider routing, streaming chat, **function calling** (fare lookup against in-memory inventory), and a **Gradio** support console. |
+| [`advanced assistants/`](advanced%20assistants/) | **Assistant demos** — Gradio chats (retail concierge, FlightAI fares, multimodal desk with TTS + image), URL → brochure studio, multi-model CLI panel, and the **FlightAI Virtual Agent** portfolio console. |
 | [`experiments/`](experiments/) | Short, single-purpose scripts (API basics, tokens, Ollama vs OpenAI, web → LLM pipelines, small assistants). |
 
 ---
 
-## Advanced assistants — FlightAI Virtual Agent
+## Advanced assistants
+
+Runnable **Gradio** apps and one **CLI** script. The directory name has a space—**quote paths** in the shell (examples below use `python "advanced assistants/…"` from the **repository root**).
+
+### Scripts in this folder
+
+| Script | What it does | Run |
+|--------|--------------|-----|
+| [`advanced_portfolio_assistant.py`](advanced%20assistants/advanced_portfolio_assistant.py) | Multi-provider FlightAI console: streaming chat and a **fare lookup** tool backed by SQLite. | `python "advanced assistants/advanced_portfolio_assistant.py" serve` |
+| [`chatbot_advanced.py`](advanced%20assistants/chatbot_advanced.py) | Streaming **retail concierge** chat: store policy in the system prompt plus a small runtime override (e.g. belts). | `python "advanced assistants/chatbot_advanced.py"` |
+| [`flight_support_agent.py`](advanced%20assistants/flight_support_agent.py) | FlightAI **Gradio** chat with function calling: **read and update** return fares in SQLite in one session. | `python "advanced assistants/flight_support_agent.py"` |
+| [`flight_multimodal_desk.py`](advanced%20assistants/flight_multimodal_desk.py) | FlightAI desk: fare tool, **TTS** on the model reply, and an optional **DALL·E** travel-poster image when a city is priced. Optional `GRADIO_USERNAME` / `GRADIO_PASSWORD` for basic auth. | `python "advanced assistants/flight_multimodal_desk.py"` |
+| [`marketing_brochure_studio.py`](advanced%20assistants/marketing_brochure_studio.py) | Fetches a public landing page via [`experiments/scraper_core.py`](experiments/scraper_core.py) and streams a short **Markdown brochure** with **GPT** or **Claude** (OpenAI-compatible client to both). | `python "advanced assistants/marketing_brochure_studio.py"` |
+| [`multi_agent_panel.py`](advanced%20assistants/multi_agent_panel.py) | **CLI** roundtable: three fixed personas (**Alex**, **Blake**, **Charlie**) on **OpenAI**, **Anthropic**, and **Gemini**; compares tone and reasoning on one topic. | `python "advanced assistants/multi_agent_panel.py" --topic "Your topic" --rounds 2` |
+
+**Keys and packages**
+
+- **OpenAI**: `OPENAI_API_KEY` — used by every script in this folder.
+- **Anthropic / Google**: `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` — `advanced_portfolio_assistant.py`, `marketing_brochure_studio.py` (Anthropic only), and `multi_agent_panel.py` (both).
+- **Shared scraping** (brochure studio): `requests`, `beautifulsoup4` (same as `experiments/` URL demos).
+- **Extras**: `gradio` for UIs; `Pillow` for `flight_multimodal_desk.py` image handling.
+
+---
+
+## FlightAI Virtual Agent — deep dive
 
 [`advanced assistants/advanced_portfolio_assistant.py`](advanced%20assistants/advanced_portfolio_assistant.py) implements **FlightAI Virtual Agent**: customer-support style chat with optional **tool use** (published return fares from a small SQLite-backed inventory), **token streaming** in the UI, and **model routing** through one OpenAI-compatible client surface:
 
