@@ -2,9 +2,45 @@
 
 This repository collects **products** and **experiments** built while working in **LLM engineering**: designing, shipping, and evaluating systems that use large language models in real workflows.
 
+## Repository layout
+
+| Location | What it is |
+|----------|------------|
+| [`advanced assistants/`](advanced%20assistants/) | **FlightAI Virtual Agent** — a richer assistant demo: multi-provider routing, streaming chat, **function calling** (fare lookup against in-memory inventory), and a **Gradio** support console. |
+| [`experiments/`](experiments/) | Short, single-purpose scripts (API basics, tokens, Ollama vs OpenAI, web → LLM pipelines, small assistants). |
+
+---
+
+## Advanced assistants — FlightAI Virtual Agent
+
+[`advanced assistants/advanced_portfolio_assistant.py`](advanced%20assistants/advanced_portfolio_assistant.py) implements **FlightAI Virtual Agent**: customer-support style chat with optional **tool use** (published return fares from a small SQLite-backed inventory), **token streaming** in the UI, and **model routing** through one OpenAI-compatible client surface:
+
+- **OpenAI** (default; required for full self-test and for **fare lookup** in the UI)
+- **Anthropic** (OpenAI-compatible endpoint)
+- **Google Gemini** (OpenAI-compatible endpoint)
+
+**Environment**
+
+- `OPENAI_API_KEY` — fare tool and recommended for self-test / streaming samples  
+- `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` — optional alternate backends  
+- `OPENAI_MODEL`, `ANTHROPIC_MODEL`, `GEMINI_MODEL` — optional overrides  
+
+**Dependencies** (see imports in the file): `openai`, `python-dotenv`, `gradio` for the web UI.
+
+**Run from the repository root** (quote the path because of the space in the directory name):
+
+```bash
+python "advanced assistants/advanced_portfolio_assistant.py" self-test
+python "advanced assistants/advanced_portfolio_assistant.py" serve
+```
+
+`self-test` runs connectivity checks, a streaming sample, and the fare-tool path (when OpenAI is configured). `serve` opens the Gradio support console in the browser (`demo` / `ui` are accepted aliases for those commands). With **Fare lookup** enabled in the UI, only the **OpenAI** backend runs the tool path (non-streaming for that flow); other providers use streaming chat without that demo tool.
+
+---
+
 ## `experiments/` — scripts and demos
 
-All **runnable Python experiments** live in [`experiments/`](experiments/): short, self-contained scripts for chat APIs, token math, comparing hosted OpenAI with local Ollama, scraping web text into prompts, and structured JSON-style outputs. Each one is meant to **try a single idea end-to-end** (prompt ± fetch ± model). This folder is not an installable package—just runnable examples you can copy from or extend.
+All **runnable Python experiments** in this folder are short, self-contained scripts for chat APIs, token math, comparing hosted OpenAI with local Ollama, scraping web text into prompts, and structured JSON-style outputs. Each one is meant to **try a single idea end-to-end** (prompt ± fetch ± model). This folder is not an installable package—just runnable examples you can copy from or extend.
 
 Run from the **repository root**, for example:
 
@@ -68,7 +104,7 @@ These use `scraper_core` in `experiments/` plus OpenAI unless noted. Set **`OPEN
 
 ## Setup (quick)
 
-- **Python 3** and packages imported by each script (commonly: `openai`, `python-dotenv`, `requests`, `beautifulsoup4`, `tiktoken` for the scripts that need them).
+- **Python 3** and packages imported by each script (commonly: `openai`, `python-dotenv`, `requests`, `beautifulsoup4`, `tiktoken` for the experiments; **`gradio`** for the FlightAI console).
 - **OpenAI**: set `OPENAI_API_KEY` in the environment or `.env` for hosted runs.
 - **Ollama**: run `ollama serve`, pull a model (e.g. `llama3.2`), and point scripts at your local base URL when required.
 
@@ -79,7 +115,7 @@ There is no single `requirements.txt` yet; dependencies match each file’s impo
 Work here also touches ideas that are not all represented as separate scripts yet:
 
 - **RAG** — chunking, embeddings, vector stores, re-ranking, evaluation  
-- **Agents & tools** — multi-step flows beyond single-shot chat  
+- **Agents & tools** — multi-step flows beyond single-shot chat *(see **FlightAI Virtual Agent** for tool calling and follow-up turns)*  
 - **Eval & observability** — test sets, quality metrics, tracing  
 
 ---
